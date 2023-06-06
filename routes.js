@@ -35,7 +35,13 @@ router.get('/users', async (req, res) => {
 router.post('/message', async (req, res) => {
     try {
         const { text, title, recipientId, authorId } = req.body
-        const new_message = await Message.create({ text, title, recipientId, authorId })
+        const user = await User.findOne({ where: { name: recipientId } });
+        if (user){
+            const new_message = await Message.create({ text, title, recipientId: user.id, authorId })
+            return res.json(new_message)
+        }
+        const new_user = await User.create({ name: recipientId, createdAt: new Date(), updatedAt: new Date() })
+        const new_message = await Message.create({ text, title, recipientId:new_user.id, authorId })
         res.json(new_message)
     }
     catch (error) {
